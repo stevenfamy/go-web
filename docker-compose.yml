@@ -1,0 +1,31 @@
+version: "3.3"
+
+services:
+  # log-backend-mongo:
+  #   image: mongo:5.0.8
+  #   container_name: log-backend-mongo
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - MONGO_INITDB_ROOT_USERNAME=DB74CE23DCFBA7FE
+  #     - MONGO_INITDB_ROOT_PASSWORD=A361BDD284CB2213
+  #   volumes:
+  #     - ~/log-mongo-db:/data/db
+  #   ports:
+  #     - 27017:27017
+  #   restart: unless-stopped
+
+  backend-mysql:
+    image: mysql:8.0.28
+    container_name: backend-mysql
+    volumes:
+      - ~/log-mysql-db:/var/lib/mysql
+    ports:
+      - 3306:3306
+      - 33060:33060
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootlogistic
+      - MYSQL_DATABASE=defaultdb
+      - MYSQL_ROOT_HOST=%
+    restart: unless-stopped
+    command: --sql_mode="REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,ONLY_FULL_GROUP_BY,ANSI,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
