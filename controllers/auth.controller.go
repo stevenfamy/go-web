@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stevenfamy/go-web/helpers"
 	"github.com/stevenfamy/go-web/models"
 )
 
 func AuthLogin(c *gin.Context) {
-	var loginIdentification models.AuthLoginModel
+	var loginIdentification models.AuthLogin
 	var userData models.User
 
 	if err := c.ShouldBindJSON(&loginIdentification); err != nil {
@@ -17,7 +18,7 @@ func AuthLogin(c *gin.Context) {
 		return
 	}
 
-	err := models.DB.QueryRow("SELECT * FROM user WHERE email_address = ? or username = ?", loginIdentification.Identification, loginIdentification.Identification).Scan(&userData.ID, &userData.UserName, &userData.EmailAddress, &userData.Password, &userData.CreatedAt, &userData.UpdatedAt)
+	err := models.DB.QueryRow("SELECT * FROM user WHERE email_address = ? or username = ?", loginIdentification.Identification, loginIdentification.Identification).Scan(&userData.ID, &userData.UserName, &userData.EmailAddress, &userData.Password, &userData.Status, &userData.CreatedAt, &userData.UpdatedAt)
 
 	if err != nil {
 		log.Printf(err.Error())
@@ -25,18 +26,22 @@ func AuthLogin(c *gin.Context) {
 		return
 	}
 
-	log.Println(userData.ID)
+	if userData.Status != 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not active!"})
+		return
+	}
 
-	// for results.Next() {
-	// 	err = results.Scan(userData.ID, userData.UserName, userData.EmailAddress, userData.Password)
-	// 	if err != nil {
-	// 		panic(err.Error())
-	// 	}
+	if res := helpers.CheckPasswordHash(loginIdentification.Password, userData.Password); !res {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password not match!"})
+		return
+	}
 
-	// 	log.Printf(userData.ID)
-	// }
+	jwt, err := helpers.GenerateJWT(userData.ID)
+	if err != nil {
+		log.Printf(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	// log.Printf(string(result))
-
-	c.JSON(http.StatusOK, "ok")
+	c.JSON(http.StatusOK, gin.H{"authToken": jwt})
 }

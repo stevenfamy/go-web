@@ -5,8 +5,7 @@ import (
 	"github.com/stevenfamy/go-web/controllers"
 )
 
-const routesGroup string = "/auth"
-
 func AuthRoutes(api *gin.RouterGroup) {
+	const routesGroup string = "/auth"
 	api.POST(routesGroup+"/login", controllers.AuthLogin)
 }

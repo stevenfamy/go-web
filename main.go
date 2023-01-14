@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stevenfamy/go-web/models"
@@ -19,15 +18,11 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.GET("/helloworld", helloWorld)
+		routes.TestRoutes(api)
 		routes.AuthRoutes(api)
 	}
 
 	if err := r.Run(portNumber); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func helloWorld(g *gin.Context) {
-	g.JSON(http.StatusOK, "helloworld, server is active")
 }
